@@ -8,7 +8,7 @@ module.exports = {
 
   // basic site info (required)
   name: 'Jun',
-  domain: 'transitivebullsh.it',
+  domain: 'changhyun.vercel.app',
   author: 'jun',
 
   // open graph metadata (optional)

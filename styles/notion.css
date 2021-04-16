@@ -542,3 +542,6 @@
 .notion-spacer {
   width: calc(min(100px, 6vw)) !important;
 }
+
+.notion-item-yellow {
+}

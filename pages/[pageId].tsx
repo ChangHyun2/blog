@@ -29,23 +29,18 @@ export const getStaticProps = async (context) => {
 }
 
 export async function getStaticPaths() {
-  if (isDev) {
-    return {
-      paths: [],
-      fallback: true
-    }
-  }
-
   const siteMaps = await getSiteMaps()
 
   const ret = {
-    paths: siteMaps.flatMap((siteMap) =>
-      Object.keys(siteMap.canonicalPageMap).map((pageId) => ({
+    paths: siteMaps.flatMap((siteMap) => {
+      console.log(siteMap.canonicalPageMap)
+
+      return Object.keys(siteMap.canonicalPageMap).map((pageId) => ({
         params: {
           pageId
         }
       }))
-    ),
+    }),
     // paths: [],
     fallback: true
   }
