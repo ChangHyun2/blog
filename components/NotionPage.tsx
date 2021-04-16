@@ -25,12 +25,13 @@ import * as types from 'lib/types'
 import * as config from 'lib/config'
 
 // components
+import { Footer } from './Footer'
 import { CustomFont } from './CustomFont'
 import { Loading } from './Loading'
 import { Page404 } from './Page404'
 import { PageHead } from './PageHead'
 import { PageActions } from './PageActions'
-import { Footer } from './Footer'
+import { PageHeader } from './PageHeader'
 import { PageSocial } from './PageSocial'
 import { GitHubShareButton } from './GitHubShareButton'
 import { ReactUtterances } from './ReactUtterances'
@@ -73,6 +74,36 @@ export const NotionPage: React.FC<types.PageProps> = ({
   error,
   pageId
 }) => {
+  const prevPos = React.useRef(0)
+  const [prevDir, setPrevDir] = React.useState(null)
+
+  const [isScrollUp, setIsScrollUp] = React.useState(true)
+
+  const handleScroll = React.useCallback((e) => {
+    let currentDir
+
+    if (prevPos.current < window.scrollY) {
+      currentDir = 'down'
+    }
+    if (prevPos.current > window.scrollY) {
+      currentDir = 'up'
+    }
+
+    prevPos.current = window.scrollY
+    setPrevDir(currentDir)
+  }, [])
+
+  React.useEffect(() => {
+    window.addEventListener('scroll', handleScroll)
+    return window.addEventListener('scroll', handleScroll)
+  }, [handleScroll])
+
+  React.useEffect(() => {
+    prevDir === 'down' && setIsScrollUp(false)
+
+    prevDir === 'up' && setIsScrollUp(true)
+  }, [prevDir])
+
   const router = useRouter()
   const lite = useSearchParam('lite')
 
@@ -98,14 +129,6 @@ export const NotionPage: React.FC<types.PageProps> = ({
 
   const title = getBlockTitle(block, recordMap) || site.name
 
-  console.log('notion page', {
-    isDev: config.isDev,
-    title,
-    pageId,
-    rootNotionPageId: site.rootNotionPageId,
-    recordMap
-  })
-
   if (!config.isServer) {
     // add important objects to the window global for easy debugging
     const g = window as any
@@ -124,7 +147,7 @@ export const NotionPage: React.FC<types.PageProps> = ({
   const isBlogPost =
     block.type === 'page' && block.parent_table === 'collection'
   const showTableOfContents = !!isBlogPost
-  const minTableOfContentsItems = 3
+  const minTableOfContentsItems = 1
 
   const socialImage =
     mapNotionImageUrl(
@@ -171,6 +194,8 @@ export const NotionPage: React.FC<types.PageProps> = ({
     >
       <PageHead site={site} />
 
+      {/* import useShowOverThresholdOrOnScrollUp from '../hooks/useShowOverThresholdOrOnScrollUp'
+const showPageHeader = useShowOverThresholdOrOnScrollUp(0) */}
       <Head>
         <meta property='og:title' content={title} />
         <meta property='og:site_name' content={site.name} />
@@ -214,7 +239,6 @@ export const NotionPage: React.FC<types.PageProps> = ({
       <CustomFont site={site} />
 
       {isLiteMode && <BodyClassName className='notion-lite' />}
-
       <NotionRenderer
         bodyClassName={cs(
           styles.notion,
@@ -266,18 +290,18 @@ export const NotionPage: React.FC<types.PageProps> = ({
         defaultPageCoverPosition={config.defaultPageCoverPosition}
         mapPageUrl={siteMapPageUrl}
         mapImageUrl={mapNotionImageUrl}
-        searchNotion={searchNotion}
+        // searchNotion={searchNotion}
         pageFooter={comments}
-        pageAside={pageAside}
-        footer={
-          <Footer
+        // pageAside={pageAside}
+        pageHeader={
+          <PageHeader
             isDarkMode={darkMode.value}
             toggleDarkMode={darkMode.toggle}
+            isScrollUp={isScrollUp}
           />
         }
+        footer={<Footer isScrollUp={isScrollUp} />}
       />
-
-      <GitHubShareButton />
     </TwitterContextProvider>
   )
 }
